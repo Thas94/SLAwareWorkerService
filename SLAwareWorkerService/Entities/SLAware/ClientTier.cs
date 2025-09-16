@@ -23,5 +23,7 @@ public partial class ClientTier
 
     public virtual ICollection<ClientTierCommunicationType> ClientTierCommunicationTypes { get; set; } = new List<ClientTierCommunicationType>();
 
+    public virtual ICollection<Client> Clients { get; set; } = new List<Client>();
+
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

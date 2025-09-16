@@ -6,10 +6,10 @@ namespace SLAwareWorkerService
     {
         private readonly ILogger<Worker> _logger;
         private readonly ISlaSeverityService _slaSeverityService;
-        public Worker(ILogger<Worker> logger, ISlaSeverityService slaSeverityService)
+        public Worker(ILogger<Worker> logger, IServiceProvider serviceProvider)
         {
             _logger = logger;
-            _slaSeverityService = slaSeverityService;
+            _slaSeverityService = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<ISlaSeverityService>();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

@@ -175,3 +175,4 @@ C:\Websites\MyProjects\Nuxt3\SLAware\SLAwareWorkerService\SLAwareWorkerService\o
 C:\Websites\MyProjects\Nuxt3\SLAware\SLAwareWorkerService\SLAwareWorkerService\obj\Debug\net8.0\SLAwareWorkerService.pdb
 C:\Websites\MyProjects\Nuxt3\SLAware\SLAwareWorkerService\SLAwareWorkerService\obj\Debug\net8.0\SLAwareWorkerService.genruntimeconfig.cache
 C:\Websites\MyProjects\Nuxt3\SLAware\SLAwareWorkerService\SLAwareWorkerService\obj\Debug\net8.0\ref\SLAwareWorkerService.dll
+C:\Websites\MyProjects\Nuxt3\SLAware\SLAwareWorkerService\SLAwareWorkerService\obj\Debug\net8.0\SLAwareWorkerService.sourcelink.json

@@ -20,4 +20,6 @@ public partial class CommunicationType
     public DateTime? UpdatedAt { get; set; }
 
     public string? UpdatedBy { get; set; }
+
+    public virtual ICollection<ClientTierCommunicationType> ClientTierCommunicationTypes { get; set; } = new List<ClientTierCommunicationType>();
 }

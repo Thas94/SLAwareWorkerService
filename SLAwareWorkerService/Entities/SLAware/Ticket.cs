@@ -21,17 +21,19 @@ public partial class Ticket
 
     public long? AssignedToId { get; set; }
 
-    public long SubCategoryId { get; set; }
+    public long TicketCategoryId { get; set; }
+
+    public long TicketSubCategoryId { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
     public virtual ICollection<TicketActivityLog> TicketActivityLogs { get; set; } = new List<TicketActivityLog>();
 
+    public virtual TicketCategory TicketCategory { get; set; } = null!;
+
     public virtual ICollection<TicketMessage> TicketMessages { get; set; } = new List<TicketMessage>();
 
     public virtual ICollection<TicketNotification> TicketNotifications { get; set; } = new List<TicketNotification>();
-
-    public virtual TicketSeverityLevel TicketSeverityLevel { get; set; } = null!;
 
     public virtual ICollection<TicketSlaTracking> TicketSlaTrackings { get; set; } = new List<TicketSlaTracking>();
 }

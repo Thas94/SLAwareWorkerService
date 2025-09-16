@@ -11,11 +11,11 @@ public partial class slaware_dataContext : DbContext
     {
     }
 
+    public virtual DbSet<Client> Clients { get; set; }
+
     public virtual DbSet<ClientTier> ClientTiers { get; set; }
 
     public virtual DbSet<ClientTierCommunicationType> ClientTierCommunicationTypes { get; set; }
-
-    public virtual DbSet<ClientTierSeverityLevel> ClientTierSeverityLevels { get; set; }
 
     public virtual DbSet<CommunicationType> CommunicationTypes { get; set; }
 
@@ -23,7 +23,7 @@ public partial class slaware_dataContext : DbContext
 
     public virtual DbSet<SlaSeverityLevel> SlaSeverityLevels { get; set; }
 
-    public virtual DbSet<SlaSeverityLevelRule> SlaSeverityLevelRules { get; set; }
+    public virtual DbSet<SlaSeverityLevelTimer> SlaSeverityLevelTimers { get; set; }
 
     public virtual DbSet<Ticket> Tickets { get; set; }
 
@@ -35,37 +35,61 @@ public partial class slaware_dataContext : DbContext
 
     public virtual DbSet<TicketNotification> TicketNotifications { get; set; }
 
-    public virtual DbSet<TicketSeverityLevel> TicketSeverityLevels { get; set; }
-
     public virtual DbSet<TicketSlaTracking> TicketSlaTrackings { get; set; }
 
     public virtual DbSet<TicketStatus> TicketStatuses { get; set; }
 
     public virtual DbSet<TicketSubCategory> TicketSubCategories { get; set; }
 
+    public virtual DbSet<TicketTag> TicketTags { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Client>(entity =>
+        {
+            entity.ToTable("client");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.ClientTierId).HasColumnName("client_tier_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.HasOne(d => d.ClientTier).WithMany(p => p.Clients)
+                .HasForeignKey(d => d.ClientTierId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_client_client_tiers");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Clients)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_client_users");
+        });
+
         modelBuilder.Entity<ClientTier>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_Client_Tiers");
 
             entity.ToTable("client_tiers");
 
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Active).HasColumnName("active");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Created_At");
+                .HasColumnName("created_at");
             entity.Property(e => e.CreatedBy)
                 .HasMaxLength(100)
-                .HasColumnName("Created_By");
-            entity.Property(e => e.Name).HasMaxLength(100);
+                .HasColumnName("created_by");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.Name)
+                .HasMaxLength(100)
+                .HasColumnName("name");
             entity.Property(e => e.UpdatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Updated_At");
+                .HasColumnName("updated_at");
             entity.Property(e => e.UpdatedBy)
                 .HasMaxLength(100)
-                .HasColumnName("Updated_By");
+                .HasColumnName("updated_by");
         });
 
         modelBuilder.Entity<ClientTierCommunicationType>(entity =>
@@ -74,35 +98,32 @@ public partial class slaware_dataContext : DbContext
 
             entity.ToTable("client_tier_communication_types");
 
-            entity.Property(e => e.ClientTierId).HasColumnName("Client_Tier_Id");
-            entity.Property(e => e.CommunicationTypeId).HasColumnName("Communication_Type_Id");
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Active).HasColumnName("active");
+            entity.Property(e => e.ClientTierId).HasColumnName("client_tier_id");
+            entity.Property(e => e.CommunicationTypeId).HasColumnName("communication_type_id");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Created_At");
+                .HasColumnName("created_at");
             entity.Property(e => e.CreatedBy)
                 .HasMaxLength(100)
-                .HasColumnName("Created_By");
+                .HasColumnName("created_by");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedBy)
+                .HasMaxLength(100)
+                .HasColumnName("updated_by");
 
             entity.HasOne(d => d.ClientTier).WithMany(p => p.ClientTierCommunicationTypes)
                 .HasForeignKey(d => d.ClientTierId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_client_tier_communication_types_client_tiers");
-        });
 
-        modelBuilder.Entity<ClientTierSeverityLevel>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK_Client_Tier_Severity_Levels");
-
-            entity.ToTable("client_tier_severity_levels");
-
-            entity.Property(e => e.ClientTierId).HasColumnName("Client_Tier_Id");
-            entity.Property(e => e.CreatedAt)
-                .HasColumnType("datetime")
-                .HasColumnName("Created_At");
-            entity.Property(e => e.CreatedBy)
-                .HasMaxLength(1000)
-                .HasColumnName("Created_By");
-            entity.Property(e => e.SlaSeverityLevelId).HasColumnName("SLA_Severity_Level_Id");
+            entity.HasOne(d => d.CommunicationType).WithMany(p => p.ClientTierCommunicationTypes)
+                .HasForeignKey(d => d.CommunicationTypeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_client_tier_communication_types_client_tier_communication_types");
         });
 
         modelBuilder.Entity<CommunicationType>(entity =>
@@ -111,19 +132,24 @@ public partial class slaware_dataContext : DbContext
 
             entity.ToTable("communication_types");
 
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Active).HasColumnName("active");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Created_At");
+                .HasColumnName("created_At");
             entity.Property(e => e.CreatedBy)
                 .HasMaxLength(100)
-                .HasColumnName("Created_By");
-            entity.Property(e => e.Name).HasMaxLength(100);
+                .HasColumnName("created_By");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.Name)
+                .HasMaxLength(100)
+                .HasColumnName("name");
             entity.Property(e => e.UpdatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Updated_At");
+                .HasColumnName("updated_At");
             entity.Property(e => e.UpdatedBy)
                 .HasMaxLength(100)
-                .HasColumnName("Updated_By");
+                .HasColumnName("updated_By");
         });
 
         modelBuilder.Entity<Role>(entity =>
@@ -132,9 +158,10 @@ public partial class slaware_dataContext : DbContext
 
             entity.ToTable("roles");
 
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.RoleName)
                 .HasMaxLength(50)
-                .HasColumnName("Role_Name");
+                .HasColumnName("role_name");
         });
 
         modelBuilder.Entity<SlaSeverityLevel>(entity =>
@@ -143,41 +170,49 @@ public partial class slaware_dataContext : DbContext
 
             entity.ToTable("sla_severity_levels");
 
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Active).HasColumnName("active");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Created_At");
+                .HasColumnName("created_at");
             entity.Property(e => e.CreatedBy)
                 .HasMaxLength(100)
-                .HasColumnName("Created_By");
-            entity.Property(e => e.Name).HasMaxLength(100);
+                .HasColumnName("created_by");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.InitialReponseHours).HasColumnName("initial_reponse_hours");
+            entity.Property(e => e.Name)
+                .HasMaxLength(100)
+                .HasColumnName("name");
+            entity.Property(e => e.TargetResolutionHours).HasColumnName("target_resolution_hours");
             entity.Property(e => e.UpdatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Updated_At");
+                .HasColumnName("updated_at");
             entity.Property(e => e.UpdatedBy)
                 .HasMaxLength(100)
-                .HasColumnName("Updated_By");
+                .HasColumnName("updated_by");
         });
 
-        modelBuilder.Entity<SlaSeverityLevelRule>(entity =>
+        modelBuilder.Entity<SlaSeverityLevelTimer>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK_SLA_Policy_Rules");
+            entity.ToTable("sla_severity_level_timers");
 
-            entity.ToTable("sla_severity_level_rules");
-
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Active).HasColumnName("active");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Created_At");
+                .HasColumnName("created_at");
             entity.Property(e => e.CreatedBy)
                 .HasMaxLength(100)
-                .HasColumnName("Created_By");
-            entity.Property(e => e.InitialResponseHours).HasColumnName("Initial_Response_Hours");
-            entity.Property(e => e.SlaSeverityLevelId).HasColumnName("SLA_Severity_Level_Id");
-            entity.Property(e => e.TargetResolutionHours).HasColumnName("Target_Resolution_Hours");
-
-            entity.HasOne(d => d.SlaSeverityLevel).WithMany(p => p.SlaSeverityLevelRules)
-                .HasForeignKey(d => d.SlaSeverityLevelId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_sla_severity_level_rules_sla_severity_levels");
+                .HasColumnName("created_by");
+            entity.Property(e => e.InitialReponseHours).HasColumnName("initial_reponse_hours");
+            entity.Property(e => e.SlaSeverityLevelId).HasColumnName("sla_severity_level_id");
+            entity.Property(e => e.TargetResolutionHours).HasColumnName("target_resolution_hours");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedBy)
+                .HasMaxLength(100)
+                .HasColumnName("updated_by");
         });
 
         modelBuilder.Entity<Ticket>(entity =>
@@ -186,21 +221,26 @@ public partial class slaware_dataContext : DbContext
 
             entity.ToTable("ticket");
 
-            entity.Property(e => e.AssignedToId).HasColumnName("Assigned_To_Id");
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.AssignedToId).HasColumnName("assigned_to_id");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Created_At");
-            entity.Property(e => e.CreatedById).HasColumnName("Created_By_Id");
-            entity.Property(e => e.SubCategoryId).HasColumnName("Sub_Category_Id");
-            entity.Property(e => e.Subject).HasMaxLength(50);
-            entity.Property(e => e.TicketNumber).HasColumnName("Ticket_Number");
-            entity.Property(e => e.TicketSeverityLevelId).HasColumnName("Ticket_Severity_Level_Id");
-            entity.Property(e => e.TicketStatusId).HasColumnName("Ticket_Status_Id");
+                .HasColumnName("created_at");
+            entity.Property(e => e.CreatedById).HasColumnName("created_by_id");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.Subject)
+                .HasMaxLength(50)
+                .HasColumnName("subject");
+            entity.Property(e => e.TicketCategoryId).HasColumnName("ticket_category_id");
+            entity.Property(e => e.TicketNumber).HasColumnName("ticket_number");
+            entity.Property(e => e.TicketSeverityLevelId).HasColumnName("ticket_severity_level_id");
+            entity.Property(e => e.TicketStatusId).HasColumnName("ticket_status_id");
+            entity.Property(e => e.TicketSubCategoryId).HasColumnName("ticket_sub_category_id");
 
-            entity.HasOne(d => d.TicketSeverityLevel).WithMany(p => p.Tickets)
-                .HasForeignKey(d => d.TicketSeverityLevelId)
+            entity.HasOne(d => d.TicketCategory).WithMany(p => p.Tickets)
+                .HasForeignKey(d => d.TicketCategoryId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ticket_ticket");
+                .HasConstraintName("FK_ticket_ticket_category");
         });
 
         modelBuilder.Entity<TicketActivityLog>(entity =>
@@ -209,22 +249,24 @@ public partial class slaware_dataContext : DbContext
 
             entity.ToTable("ticket_activity_log");
 
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Created_At");
+                .HasColumnName("created_at");
             entity.Property(e => e.CreatedBy)
                 .HasMaxLength(100)
-                .HasColumnName("Created_By");
-            entity.Property(e => e.NewTicketStatusId).HasColumnName("New_Ticket_Status_Id");
-            entity.Property(e => e.OldTicketStatusId).HasColumnName("Old_Ticket_Status_Id");
-            entity.Property(e => e.TicketId).HasColumnName("Ticket_Id");
+                .HasColumnName("created_by");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.NewTicketStatusId).HasColumnName("new_ticket_status_id");
+            entity.Property(e => e.OldTicketStatusId).HasColumnName("old_ticket_status_id");
+            entity.Property(e => e.TicketId).HasColumnName("ticket_id");
             entity.Property(e => e.UpdatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Updated_At");
+                .HasColumnName("updated_at");
             entity.Property(e => e.UpdatedBy)
                 .HasMaxLength(100)
-                .HasColumnName("Updated_By");
-            entity.Property(e => e.UserId).HasColumnName("User_Id");
+                .HasColumnName("updated_by");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.NewTicketStatus).WithMany(p => p.TicketActivityLogNewTicketStatuses)
                 .HasForeignKey(d => d.NewTicketStatusId)
@@ -248,21 +290,27 @@ public partial class slaware_dataContext : DbContext
 
         modelBuilder.Entity<TicketCategory>(entity =>
         {
-            entity.ToTable("ticket_categories");
+            entity.HasKey(e => e.Id).HasName("PK_ticket_categories");
 
+            entity.ToTable("ticket_category");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Active).HasColumnName("active");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Created_At");
+                .HasColumnName("created_at");
             entity.Property(e => e.CreatedBy)
                 .HasMaxLength(100)
-                .HasColumnName("Created_By");
-            entity.Property(e => e.Name).HasMaxLength(100);
+                .HasColumnName("created_by");
+            entity.Property(e => e.Name)
+                .HasMaxLength(100)
+                .HasColumnName("name");
             entity.Property(e => e.UpdatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Updated_At");
+                .HasColumnName("updated_at");
             entity.Property(e => e.UpdatedBy)
                 .HasMaxLength(100)
-                .HasColumnName("Updated_By");
+                .HasColumnName("updated_by");
         });
 
         modelBuilder.Entity<TicketMessage>(entity =>
@@ -271,15 +319,16 @@ public partial class slaware_dataContext : DbContext
 
             entity.ToTable("ticket_messages");
 
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Created_At");
-            entity.Property(e => e.IsRead).HasColumnName("Is_Read");
-            entity.Property(e => e.MessageContent).HasColumnName("Message_Content");
+                .HasColumnName("created_at");
+            entity.Property(e => e.IsRead).HasColumnName("is_read");
+            entity.Property(e => e.MessageContent).HasColumnName("message_content");
             entity.Property(e => e.RepliedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Replied_At");
-            entity.Property(e => e.TicketId).HasColumnName("Ticket_Id");
+                .HasColumnName("replied_at");
+            entity.Property(e => e.TicketId).HasColumnName("ticket_id");
 
             entity.HasOne(d => d.Ticket).WithMany(p => p.TicketMessages)
                 .HasForeignKey(d => d.TicketId)
@@ -293,21 +342,23 @@ public partial class slaware_dataContext : DbContext
 
             entity.ToTable("ticket_notifications");
 
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Created_At");
+                .HasColumnName("created_at");
             entity.Property(e => e.CreatedBy)
                 .HasMaxLength(100)
-                .HasColumnName("Created_By");
-            entity.Property(e => e.IsRead).HasColumnName("Is_Read");
-            entity.Property(e => e.TicketId).HasColumnName("Ticket_Id");
+                .HasColumnName("created_by");
+            entity.Property(e => e.IsRead).HasColumnName("is_read");
+            entity.Property(e => e.Message).HasColumnName("message");
+            entity.Property(e => e.TicketId).HasColumnName("ticket_id");
             entity.Property(e => e.UpdatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Updated_At");
+                .HasColumnName("updated_at");
             entity.Property(e => e.UpdatedBy)
                 .HasMaxLength(100)
-                .HasColumnName("Updated_By");
-            entity.Property(e => e.UserId).HasColumnName("User_Id");
+                .HasColumnName("updated_by");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.Ticket).WithMany(p => p.TicketNotifications)
                 .HasForeignKey(d => d.TicketId)
@@ -320,63 +371,40 @@ public partial class slaware_dataContext : DbContext
                 .HasConstraintName("FK_ticket_notifications_users");
         });
 
-        modelBuilder.Entity<TicketSeverityLevel>(entity =>
-        {
-            entity.ToTable("ticket_severity_levels");
-
-            entity.Property(e => e.CreatedAt)
-                .HasColumnType("datetime")
-                .HasColumnName("Created_At");
-            entity.Property(e => e.CreatedBy)
-                .HasMaxLength(100)
-                .HasColumnName("Created_By");
-            entity.Property(e => e.Name).HasMaxLength(100);
-            entity.Property(e => e.UpdatedAt)
-                .HasColumnType("datetime")
-                .HasColumnName("Updated_At");
-            entity.Property(e => e.UpdatedBy)
-                .HasMaxLength(100)
-                .HasColumnName("Updated_By");
-        });
-
         modelBuilder.Entity<TicketSlaTracking>(entity =>
         {
             entity.ToTable("ticket_sla_tracking");
 
             entity.HasIndex(e => e.Id, "IX_ticket_sla_tracking");
 
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Created_At");
+                .HasColumnName("created_at");
             entity.Property(e => e.FirstResponseAt)
                 .HasColumnType("datetime")
-                .HasColumnName("First_Response_At");
-            entity.Property(e => e.IsResolutionSlaBreach)
-                .HasColumnType("datetime")
-                .HasColumnName("IsResolution_SLA_Breach");
-            entity.Property(e => e.IsResponseSlaBreach)
-                .HasColumnType("datetime")
-                .HasColumnName("IsResponse_SLA_Breach");
+                .HasColumnName("first_response_at");
+            entity.Property(e => e.IsResolutionSlaBreach).HasColumnName("is_resolution_sla_breach");
+            entity.Property(e => e.IsResponseSlaBreach).HasColumnName("is_response_sla_breach");
             entity.Property(e => e.PausedDtm)
                 .HasColumnType("datetime")
-                .HasColumnName("Paused_DTM");
-            entity.Property(e => e.RemainingResolutionDueTime).HasColumnName("Remaining_Resolution_Due_Time");
-            entity.Property(e => e.RemainingResponseDueTime).HasColumnName("Remaining_Response_Due_Time");
+                .HasColumnName("paused_dtm");
+            entity.Property(e => e.RemainingResolutionDueTime).HasColumnName("remaining_resolution_due_time");
+            entity.Property(e => e.RemainingResponseDueTime).HasColumnName("remaining_response_due_time");
             entity.Property(e => e.ResolutionDueDtm)
                 .HasColumnType("datetime")
-                .HasColumnName("Resolution_Due_DTM");
+                .HasColumnName("resolution_due_dtm");
             entity.Property(e => e.ResolvedDtm)
                 .HasColumnType("datetime")
-                .HasColumnName("Resolved_DTM");
+                .HasColumnName("resolved_dtm");
             entity.Property(e => e.ResponseDueDtm)
                 .HasColumnType("datetime")
-                .HasColumnName("Response_Due_DTM");
-            entity.Property(e => e.SlaSeverityLevelId).HasColumnName("SLA_Severity_Level_Id");
-            entity.Property(e => e.TicketId).HasColumnName("Ticket_Id");
+                .HasColumnName("response_due_dtm");
+            entity.Property(e => e.SlaSeverityLevelId).HasColumnName("sla_severity_level_Id");
+            entity.Property(e => e.TicketId).HasColumnName("ticket_Id");
 
-            entity.HasOne(d => d.IdNavigation).WithOne(p => p.TicketSlaTracking)
-                .HasForeignKey<TicketSlaTracking>(d => d.Id)
+            entity.HasOne(d => d.SlaSeverityLevel).WithMany(p => p.TicketSlaTrackings)
+                .HasForeignKey(d => d.SlaSeverityLevelId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ticket_sla_tracking_sla_severity_levels");
 
@@ -392,34 +420,88 @@ public partial class slaware_dataContext : DbContext
 
             entity.ToTable("ticket_status");
 
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Active).HasColumnName("active");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Created_At");
+                .HasColumnName("created_at");
             entity.Property(e => e.CreatedBy)
                 .HasMaxLength(100)
-                .HasColumnName("Created_By");
-            entity.Property(e => e.Description).HasMaxLength(250);
-            entity.Property(e => e.Name).HasMaxLength(50);
+                .HasColumnName("created_by");
+            entity.Property(e => e.Description)
+                .HasMaxLength(250)
+                .HasColumnName("description");
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .HasColumnName("name");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedBy)
+                .HasMaxLength(100)
+                .HasColumnName("updated_by");
         });
 
         modelBuilder.Entity<TicketSubCategory>(entity =>
         {
-            entity.ToTable("ticket_sub_categories");
+            entity.HasKey(e => e.Id).HasName("PK_ticket_sub_categories");
 
-            entity.Property(e => e.CategoryId).HasColumnName("Category_Id");
+            entity.ToTable("ticket_sub_category");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Active).HasColumnName("active");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Created_At");
+                .HasColumnName("created_at");
             entity.Property(e => e.CreatedBy)
                 .HasMaxLength(100)
-                .HasColumnName("Created_By");
-            entity.Property(e => e.Name).HasMaxLength(250);
+                .HasColumnName("created_by");
+            entity.Property(e => e.Name)
+                .HasMaxLength(250)
+                .HasColumnName("name");
+            entity.Property(e => e.TagId).HasColumnName("tag_id");
+            entity.Property(e => e.TicketCategoryId).HasColumnName("ticket_category_id");
             entity.Property(e => e.UpdatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("Updated_At");
+                .HasColumnName("updated_at");
             entity.Property(e => e.UpdatedBy)
                 .HasMaxLength(100)
-                .HasColumnName("Updated_By");
+                .HasColumnName("updated_by");
+
+            entity.HasOne(d => d.Tag).WithMany(p => p.TicketSubCategories)
+                .HasForeignKey(d => d.TagId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ticket_sub_category_ticket_tags");
+
+            entity.HasOne(d => d.TicketCategory).WithMany(p => p.TicketSubCategories)
+                .HasForeignKey(d => d.TicketCategoryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ticket_sub_category_ticket_sub_category");
+        });
+
+        modelBuilder.Entity<TicketTag>(entity =>
+        {
+            entity.ToTable("ticket_tags");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Active).HasColumnName("active");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy)
+                .HasMaxLength(100)
+                .HasColumnName("created_by");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.Name)
+                .HasMaxLength(100)
+                .HasColumnName("name");
+            entity.Property(e => e.SlaSeverityLevelId).HasColumnName("sla_severity_level_id");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedBy)
+                .HasMaxLength(100)
+                .HasColumnName("updated_by");
         });
 
         modelBuilder.Entity<User>(entity =>

@@ -18,4 +18,8 @@ public partial class TicketCategory
     public DateTime? UpdatedAt { get; set; }
 
     public string? UpdatedBy { get; set; }
+
+    public virtual ICollection<TicketSubCategory> TicketSubCategories { get; set; } = new List<TicketSubCategory>();
+
+    public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 }

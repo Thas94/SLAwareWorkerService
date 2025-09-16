@@ -17,5 +17,11 @@ public partial class ClientTierCommunicationType
 
     public string CreatedBy { get; set; } = null!;
 
+    public DateTime? UpdatedAt { get; set; }
+
+    public string? UpdatedBy { get; set; }
+
     public virtual ClientTier ClientTier { get; set; } = null!;
+
+    public virtual CommunicationType CommunicationType { get; set; } = null!;
 }

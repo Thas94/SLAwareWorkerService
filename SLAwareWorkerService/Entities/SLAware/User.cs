@@ -17,6 +17,8 @@ public partial class User
 
     public virtual ClientTier ClientTier { get; set; } = null!;
 
+    public virtual ICollection<Client> Clients { get; set; } = new List<Client>();
+
     public virtual Role Role { get; set; } = null!;
 
     public virtual ICollection<TicketActivityLog> TicketActivityLogs { get; set; } = new List<TicketActivityLog>();

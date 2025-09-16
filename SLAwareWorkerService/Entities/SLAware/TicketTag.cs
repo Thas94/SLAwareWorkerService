@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 namespace SLAwareWorkerService.Entities.SLAware;
 
-public partial class TicketSubCategory
+public partial class TicketTag
 {
     public long Id { get; set; }
 
-    public long TicketCategoryId { get; set; }
-
-    public long TagId { get; set; }
-
     public string Name { get; set; } = null!;
+
+    public string Description { get; set; } = null!;
+
+    public long SlaSeverityLevelId { get; set; }
 
     public bool Active { get; set; }
 
@@ -23,7 +23,5 @@ public partial class TicketSubCategory
 
     public string? UpdatedBy { get; set; }
 
-    public virtual TicketTag Tag { get; set; } = null!;
-
-    public virtual TicketCategory TicketCategory { get; set; } = null!;
+    public virtual ICollection<TicketSubCategory> TicketSubCategories { get; set; } = new List<TicketSubCategory>();
 }

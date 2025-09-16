@@ -1,9 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using SLAwareWorkerService;
 using SLAwareWorkerService.Entities.SLAware;
+using SLAwareWorkerService.Interfaces;
+using SLAwareWorkerService.Services.SlaSeverity;
+
+
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddHostedService<Worker>();
+
+builder.Services.AddScoped<ISlaSeverityService, SlaSeverityService>();
 
 var connectionString = builder.Configuration.GetConnectionString("SLAware");
 builder.Services.AddDbContext<slaware_dataContext>(options =>
@@ -14,6 +20,8 @@ builder.Services.AddDbContext<slaware_dataContext>(options =>
         sqloptions.MaxBatchSize(20);
     });
 });
+
+builder.Services.AddScoped<slaware_dataContext>();
 
 var host = builder.Build();
 host.Run();
