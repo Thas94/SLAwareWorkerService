@@ -10,8 +10,8 @@ namespace SLAwareWorkerService.Services
     public class SLAwareBaseService
     {
         public readonly slaware_dataContext _slaware_DataContext;
-        public static readonly TimeSpan WorkStart = new TimeSpan(14, 41, 0);
-        public static readonly TimeSpan WorkEnd = new TimeSpan(16, 45, 0);
+        public static readonly TimeSpan WorkStart = new TimeSpan(16, 59, 0);
+        public static readonly TimeSpan WorkEnd = new TimeSpan(17, 0, 0);
         public SLAwareBaseService(slaware_dataContext slaware_DataContext)
         {
             _slaware_DataContext = slaware_DataContext;
