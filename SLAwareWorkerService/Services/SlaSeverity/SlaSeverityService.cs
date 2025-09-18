@@ -52,27 +52,6 @@ namespace SLAwareWorkerService.Services.SlaSeverity
                             PauseSlaTimers(track.TicketId, workEndToday);
                     }
                 }
-
-                //if (IsWorkingDay(DateTime.Now))
-                //{
-                //    if (IsWorkingHours(DateTime.Now))
-                //    {
-                //        foreach (var track in _slaware_DataContext.TicketSlaTrackings.Where(x => x.ResponseDueDtm.Day == DateTime.Now.Day 
-                //        || x.ResolutionDueDtm.Day == DateTime.Now.Day).ToList())
-                //        {
-                //            //Resume
-                //            if (track.PausedDtm.HasValue)
-                //                ResumeSlaTimers(track.TicketId);
-
-                //            //check sla breach
-                //            if(!track.IsResponseSlaBreach)
-                //                track.IsResponseSlaBreach = IsResponseBreached(track);
-                //            if(!track.IsResolutionSlaBreach)
-                //                track.IsResolutionSlaBreach = IsResolutionBreached(track);
-                //            _slaware_DataContext.SaveChanges();
-                //        }
-                //    }
-                //}
             }
             catch (Exception ex)
             {
@@ -84,19 +63,21 @@ namespace SLAwareWorkerService.Services.SlaSeverity
         {
             var sla = _slaware_DataContext.TicketSlaTrackings.FirstOrDefault(x => x.TicketId == ticketId);
             sla.PausedDtm = workEndToday;
-            if(!sla.IsResponseSlaBreach)
+            if(!sla.IsResponseSlaBreach )
             {
-                var test = WorkEnd - sla.CreatedAt.TimeOfDay;
-                var level = _slaware_DataContext.SlaSeverityLevels.FirstOrDefault(x => x.Id == sla.SlaSeverityLevelId);
-                var test2 = new TimeSpan((int)level.InitialReponseHours, 0, 0) - test;
-                sla.RemainingResponseDueTime = TimeOnly.FromTimeSpan(test2);
+                if(sla.ResponseDueDtm.Day == DateTime.Now.Day)
+                {
+                    var remaining = sla.ResponseDueDtm - DateTime.Now.Date.Add(WorkEnd);
+                    sla.RemainingResponseDueTime = TimeOnly.FromTimeSpan(remaining);
+                }
             }
             if(!sla.IsResolutionSlaBreach)
             {
-                var test =  WorkEnd - sla.CreatedAt.TimeOfDay;
-                var level = _slaware_DataContext.SlaSeverityLevels.FirstOrDefault(x => x.Id == sla.SlaSeverityLevelId);
-                var test2 = new TimeSpan((int)level.TargetResolutionHours, 0, 0) - test;
-                sla.RemainingResolutionDueTime = TimeOnly.FromTimeSpan(test2);
+                if(sla.ResolutionDueDtm.Day == DateTime.Now.Day)
+                {
+                    var remaining = sla.ResolutionDueDtm - DateTime.Now.Date.Add(WorkEnd);
+                    sla.RemainingResolutionDueTime = TimeOnly.FromTimeSpan(remaining);
+                }
             }
             _slaware_DataContext.SaveChanges();
         }
@@ -113,8 +94,6 @@ namespace SLAwareWorkerService.Services.SlaSeverity
             track.RemainingResponseDueTime = null;
             track.RemainingResolutionDueTime = null;
             _slaware_DataContext.SaveChanges();
-            //track.ResponseDueDtm = CalculateSlaDue(track.CreatedAt, track.RemainingResponseDueTime.Value.ToTimeSpan());
-            //track.ResolutionDueDtm = CalculateSlaDue(track.CreatedAt, track.RemainingResolutionDueTime.Value.ToTimeSpan());
         }
 
         private (bool, DateTime?) IsResponseBreached(TicketSlaTracking ticket)
@@ -139,42 +118,6 @@ namespace SLAwareWorkerService.Services.SlaSeverity
             return (false, null);
         }
 
-        private DateTime CalculateSlaDue(DateTime start, TimeSpan slaDuration)
-        {
-            var current = start;
-            var remaining = slaDuration;
-
-            try
-            {
-                while (remaining > TimeSpan.Zero)
-                {
-                    //check and skip if current is weekends
-                    if (!IsWorkingDay(current.Date))
-                    {
-                        current = current.Date.AddDays(1).Add(WorkStart);
-                        continue;
-                    }
-
-                    var workStartToday = current.Date.Add(WorkStart);
-                    var workEndToday = current.Date.Add(WorkEnd);
-
-                    var availableToday = workEndToday - current;
-                    var timeToAdd = remaining < availableToday ? remaining : availableToday;
-
-                    current = current.Add(timeToAdd);
-                    remaining -= timeToAdd;
-
-                    //check if there's hours remaining, move to the next day
-                    if (remaining > TimeSpan.Zero)
-                        current = current.Date.AddDays(1).Add(WorkStart);
-                }
-            }
-            catch (Exception ex)
-            {
-
-            }
-            return current;
-        }
-
+        
     }
 }

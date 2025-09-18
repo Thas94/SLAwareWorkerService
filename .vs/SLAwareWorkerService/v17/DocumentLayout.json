@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "C:\\Websites\\MyProjects\\Nuxt3\\SLAware\\SLAwareWorkerService\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{7E040C78-DD24-4749-953C-618283EFC02C}|SLAwareWorkerService\\SLAwareWorkerService.csproj|c:\\websites\\myprojects\\nuxt3\\slaware\\slawareworkerservice\\slawareworkerservice\\services\\slaseverity\\slaseverityservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7E040C78-DD24-4749-953C-618283EFC02C}|SLAwareWorkerService\\SLAwareWorkerService.csproj|solutionrelative:slawareworkerservice\\services\\slaseverity\\slaseverityservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{7E040C78-DD24-4749-953C-618283EFC02C}|SLAwareWorkerService\\SLAwareWorkerService.csproj|c:\\websites\\myprojects\\nuxt3\\slaware\\slawareworkerservice\\slawareworkerservice\\services\\slawarebaseservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7E040C78-DD24-4749-953C-618283EFC02C}|SLAwareWorkerService\\SLAwareWorkerService.csproj|solutionrelative:slawareworkerservice\\services\\slawarebaseservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7E040C78-DD24-4749-953C-618283EFC02C}|SLAwareWorkerService\\SLAwareWorkerService.csproj|c:\\websites\\myprojects\\nuxt3\\slaware\\slawareworkerservice\\slawareworkerservice\\services\\slaseverity\\slaseverityservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7E040C78-DD24-4749-953C-618283EFC02C}|SLAwareWorkerService\\SLAwareWorkerService.csproj|solutionrelative:slawareworkerservice\\services\\slaseverity\\slaseverityservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{7E040C78-DD24-4749-953C-618283EFC02C}|SLAwareWorkerService\\SLAwareWorkerService.csproj|c:\\websites\\myprojects\\nuxt3\\slaware\\slawareworkerservice\\slawareworkerservice\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -42,7 +42,7 @@
       "DocumentGroups": [
         {
           "DockedHeight": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
@@ -68,13 +68,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "SlaSeverityService.cs",
               "DocumentMoniker": "C:\\Websites\\MyProjects\\Nuxt3\\SLAware\\SLAwareWorkerService\\SLAwareWorkerService\\Services\\SlaSeverity\\SlaSeverityService.cs",
               "RelativeDocumentMoniker": "SLAwareWorkerService\\Services\\SlaSeverity\\SlaSeverityService.cs",
               "ToolTip": "C:\\Websites\\MyProjects\\Nuxt3\\SLAware\\SLAwareWorkerService\\SLAwareWorkerService\\Services\\SlaSeverity\\SlaSeverityService.cs",
               "RelativeToolTip": "SLAwareWorkerService\\Services\\SlaSeverity\\SlaSeverityService.cs",
-              "ViewState": "AgIAAFUAAAAAAAAAAAAAAG4AAAAmAAAAAAAAAA==",
+              "ViewState": "AgIAABYAAAAAAAAAAAAAADMAAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-15T09:43:50.996Z",
               "IsPinned": true,
@@ -82,7 +82,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "SLAwareBaseService.cs",
               "DocumentMoniker": "C:\\Websites\\MyProjects\\Nuxt3\\SLAware\\SLAwareWorkerService\\SLAwareWorkerService\\Services\\SLAwareBaseService.cs",
               "RelativeDocumentMoniker": "SLAwareWorkerService\\Services\\SLAwareBaseService.cs",
@@ -104,7 +104,8 @@
               "RelativeToolTip": "SLAwareWorkerService\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T09:42:59.588Z"
+              "WhenOpened": "2025-09-15T09:42:59.588Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -116,7 +117,8 @@
               "RelativeToolTip": "SLAwareWorkerService\\Enums\\Enums.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAgAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T09:54:41.913Z"
+              "WhenOpened": "2025-09-15T09:54:41.913Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -128,7 +130,8 @@
               "RelativeToolTip": "SLAwareWorkerService\\Interfaces\\ISlaSeverityService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T09:44:11.946Z"
+              "WhenOpened": "2025-09-15T09:44:11.946Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -140,7 +143,8 @@
               "RelativeToolTip": "SLAwareWorkerService\\appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-09-15T09:42:27.736Z"
+              "WhenOpened": "2025-09-15T09:42:27.736Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",

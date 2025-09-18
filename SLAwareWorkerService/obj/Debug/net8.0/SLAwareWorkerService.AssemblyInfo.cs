@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SLAwareWorkerService")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e70fda67f13a4d23bdfae63bb9392e87183e5b99")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dbf9fa204df85c3ca0e71b34195445955bd9dd2d")]
 [assembly: System.Reflection.AssemblyProductAttribute("SLAwareWorkerService")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SLAwareWorkerService")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
