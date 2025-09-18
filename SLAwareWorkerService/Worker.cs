@@ -23,7 +23,7 @@ namespace SLAwareWorkerService
 
                 _slaSeverityService.SlaTracking();
 
-                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             }
         }
     }

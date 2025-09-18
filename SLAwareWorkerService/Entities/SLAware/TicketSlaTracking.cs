@@ -25,11 +25,15 @@ public partial class TicketSlaTracking
 
     public DateTime? ResolvedDtm { get; set; }
 
-    public bool? IsResponseSlaBreach { get; set; }
+    public bool IsResponseSlaBreach { get; set; }
 
-    public bool? IsResolutionSlaBreach { get; set; }
+    public bool IsResolutionSlaBreach { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public DateTime? ResponseSlaBreachDtm { get; set; }
+
+    public DateTime? ResolutionSlaBreachDtm { get; set; }
 
     public virtual SlaSeverityLevel SlaSeverityLevel { get; set; } = null!;
 

@@ -6,13 +6,12 @@ using System.Threading.Tasks;
 using SLAwareWorkerService.Entities.SLAware;
 using SLAwareWorkerService.Interfaces;
 using SLAwareWorkerService.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace SLAwareWorkerService.Services.SlaSeverity
 {
     public class SlaSeverityService : SLAwareBaseService, ISlaSeverityService
     {
-        public static readonly TimeSpan WorkStart = new TimeSpan(8, 30, 0);
-        public static readonly TimeSpan WorkEnd = new TimeSpan(17, 0, 0);
         public SlaSeverityService(slaware_dataContext slaware_DataContext) : base(slaware_DataContext)
         { }
 
@@ -24,68 +23,56 @@ namespace SLAwareWorkerService.Services.SlaSeverity
                 var workStartToday = current.Date.Add(WorkStart);
                 var workEndToday = current.Date.Add(WorkEnd);
 
-                if (IsWorkingDay(DateTime.Now))
+                foreach (var track in _slaware_DataContext.TicketSlaTrackings.Where(x => x.ResponseDueDtm.Day == DateTime.Now.Day
+                        || x.ResolutionDueDtm.Day == DateTime.Now.Day).ToList())
                 {
-                    if (IsWorkingHours(DateTime.Now))
+                    if (IsWorkingDay(DateTime.Now) && IsWorkingHours(DateTime.Now))
                     {
-                        var trackings = (from ticket in _slaware_DataContext.Tickets
-                                         join track in _slaware_DataContext.TicketSlaTrackings on ticket.Id equals track.TicketId
-                                         where ticket.TicketStatusId != (long)Enums.Enums.TicketStatus.Resolved
-                                         || ticket.TicketStatusId != (long)Enums.Enums.TicketStatus.Closed
-                                         select new TicketSlaTracking
-                                         {
-                                             TicketId = ticket.Id,
-                                             ResponseDueDtm = track.ResponseDueDtm,
-                                             ResolutionDueDtm = track.ResolutionDueDtm,
-                                             RemainingResponseDueTime = track.RemainingResponseDueTime,
-                                             RemainingResolutionDueTime = track.RemainingResolutionDueTime,
-                                             PausedDtm = track.PausedDtm,
-                                             IsResponseSlaBreach = track.IsResponseSlaBreach,
-                                             IsResolutionSlaBreach = track.IsResolutionSlaBreach
-                                         }).ToList();
+                        //Resume
+                        if (track.PausedDtm.HasValue)
+                            ResumeSlaTimers(track.TicketId);
 
-                        foreach (var track in trackings)
+                        //check sla breach
+                        if (!track.IsResponseSlaBreach)
                         {
-                            //Resume
-                            if (track.PausedDtm.HasValue)
-                                ResumeSlaTimers(track.Id);
-
-                            //check sla breach
-                            track.IsResponseSlaBreach = IsResponseBreached(track);
-                            track.IsResolutionSlaBreach = IsResolutionBreached(track);
+                            track.IsResponseSlaBreach = IsResponseBreached(track).Item1;
+                            track.ResponseSlaBreachDtm = IsResponseBreached(track).Item2;
                         }
+                        if (!track.IsResolutionSlaBreach)
+                        {
+                            track.IsResolutionSlaBreach = IsResolutionBreached(track).Item1;
+                            track.ResolutionSlaBreachDtm = IsResolutionBreached(track).Item2;
+                        }
+                        _slaware_DataContext.SaveChanges();
                     }
-
-
-                    //foreach (var track in trackings)
-                    //{
-                    //    if (!IsWorkingHours(DateTime.Now))
-                    //    {
-                    //        //Pause
-                    //        if (!track.PausedDtm.HasValue)
-                    //            PauseSlaTimers(track.Id, workEndToday);
-                    //    }
-                    //    else
-                    //    {
-                    //        //Resume
-                    //        if (track.PausedDtm.HasValue)
-                    //            ResumeSlaTimers(track.Id);
-                    //    }
-                    //    ////Pause
-                    //    //if (current > workStartToday)
-                    //    //{
-                    //    //    if (!track.PausedDtm.HasValue)
-                    //    //        PauseSlaTimers(track.Id, workEndToday);
-                    //    //}
-
-                    //    ////Resume
-                    //    //if (current < workEndToday)
-                    //    //{
-                    //    //    if (track.PausedDtm.HasValue)
-                    //    //        ResumeSlaTimers(track.Id);
-                    //    //}
-                    //}
+                    else
+                    {
+                        //Pause
+                        if (!track.PausedDtm.HasValue)
+                            PauseSlaTimers(track.TicketId, workEndToday);
+                    }
                 }
+
+                //if (IsWorkingDay(DateTime.Now))
+                //{
+                //    if (IsWorkingHours(DateTime.Now))
+                //    {
+                //        foreach (var track in _slaware_DataContext.TicketSlaTrackings.Where(x => x.ResponseDueDtm.Day == DateTime.Now.Day 
+                //        || x.ResolutionDueDtm.Day == DateTime.Now.Day).ToList())
+                //        {
+                //            //Resume
+                //            if (track.PausedDtm.HasValue)
+                //                ResumeSlaTimers(track.TicketId);
+
+                //            //check sla breach
+                //            if(!track.IsResponseSlaBreach)
+                //                track.IsResponseSlaBreach = IsResponseBreached(track);
+                //            if(!track.IsResolutionSlaBreach)
+                //                track.IsResolutionSlaBreach = IsResolutionBreached(track);
+                //            _slaware_DataContext.SaveChanges();
+                //        }
+                //    }
+                //}
             }
             catch (Exception ex)
             {
@@ -93,56 +80,100 @@ namespace SLAwareWorkerService.Services.SlaSeverity
             }
         }
 
-        private bool IsWorkingDay(DateTime date)
-        {
-            return date.DayOfWeek != DayOfWeek.Saturday && date.DayOfWeek != DayOfWeek.Sunday ? true : false;
-        }        
-        private bool IsWorkingHours(DateTime date)
-        {
-            return date.TimeOfDay >= WorkStart && date.TimeOfDay <= WorkEnd ? true : false;
-        }
-
         private void PauseSlaTimers(long ticketId, DateTime workEndToday)
         {
-            var sla = _slaware_DataContext.TicketSlaTrackings.Find(ticketId);
-            sla.PausedDtm = DateTime.Now;
-            sla.RemainingResponseDueTime = TimeOnly.FromTimeSpan(sla.ResponseDueDtm - workEndToday);
-            sla.RemainingResolutionDueTime = TimeOnly.FromTimeSpan(sla.ResolutionDueDtm - workEndToday);
-            //_slaware_DataContext.SaveChanges();
+            var sla = _slaware_DataContext.TicketSlaTrackings.FirstOrDefault(x => x.TicketId == ticketId);
+            sla.PausedDtm = workEndToday;
+            if(!sla.IsResponseSlaBreach)
+            {
+                var test = WorkEnd - sla.CreatedAt.TimeOfDay;
+                var level = _slaware_DataContext.SlaSeverityLevels.FirstOrDefault(x => x.Id == sla.SlaSeverityLevelId);
+                var test2 = new TimeSpan((int)level.InitialReponseHours, 0, 0) - test;
+                sla.RemainingResponseDueTime = TimeOnly.FromTimeSpan(test2);
+            }
+            if(!sla.IsResolutionSlaBreach)
+            {
+                var test =  WorkEnd - sla.CreatedAt.TimeOfDay;
+                var level = _slaware_DataContext.SlaSeverityLevels.FirstOrDefault(x => x.Id == sla.SlaSeverityLevelId);
+                var test2 = new TimeSpan((int)level.TargetResolutionHours, 0, 0) - test;
+                sla.RemainingResolutionDueTime = TimeOnly.FromTimeSpan(test2);
+            }
+            _slaware_DataContext.SaveChanges();
         }
 
         private void ResumeSlaTimers(long ticketId)
         {
             var current = DateTime.Now;
-            var track = _slaware_DataContext.TicketSlaTrackings.Find(ticketId);
-            track.ResponseDueDtm = current.Add(track.RemainingResponseDueTime.Value.ToTimeSpan());
-            track.ResolutionDueDtm = current.Add(track.RemainingResolutionDueTime.Value.ToTimeSpan());
+            var track = _slaware_DataContext.TicketSlaTrackings.FirstOrDefault(x => x.TicketId == ticketId);
+            if (!track.IsResponseSlaBreach && track.RemainingResponseDueTime.HasValue)
+                track.ResponseDueDtm = current.Add(track.RemainingResponseDueTime.Value.ToTimeSpan());
+            if (!track.IsResolutionSlaBreach && track.RemainingResolutionDueTime.HasValue)
+                track.ResolutionDueDtm = current.Add(track.RemainingResolutionDueTime.Value.ToTimeSpan());
             track.PausedDtm = null;
             track.RemainingResponseDueTime = null;
             track.RemainingResolutionDueTime = null;
-            //_slaware_DataContext.SaveChanges();
+            _slaware_DataContext.SaveChanges();
+            //track.ResponseDueDtm = CalculateSlaDue(track.CreatedAt, track.RemainingResponseDueTime.Value.ToTimeSpan());
+            //track.ResolutionDueDtm = CalculateSlaDue(track.CreatedAt, track.RemainingResolutionDueTime.Value.ToTimeSpan());
         }
 
-        private bool IsResponseBreached(TicketSlaTracking ticket)
+        private (bool, DateTime?) IsResponseBreached(TicketSlaTracking ticket)
         {
-            if (ticket.FirstResponseAt == null && DateTime.UtcNow > ticket.ResponseDueDtm)
-                return true;
+            if (ticket.FirstResponseAt == null && DateTime.Now > ticket.ResponseDueDtm)
+                return (true, DateTime.Now);
 
             if (ticket.FirstResponseAt != null && ticket.FirstResponseAt > ticket.ResponseDueDtm)
-                return true;
+                return (true, DateTime.Now);
 
-            return false;
+            return (false, null);
         }
 
-        private bool IsResolutionBreached(TicketSlaTracking ticket)
+        private (bool, DateTime?) IsResolutionBreached(TicketSlaTracking ticket)
         {
-            if (ticket.ResolvedDtm == null && DateTime.UtcNow > ticket.ResolutionDueDtm)
-                return true;
+            if (ticket.ResolvedDtm == null && DateTime.Now > ticket.ResolutionDueDtm)
+                return (true, DateTime.Now);
 
             if (ticket.ResolvedDtm != null && ticket.ResolvedDtm > ticket.ResolutionDueDtm)
-                return true;
+                return (true, DateTime.Now);
 
-            return false;
+            return (false, null);
+        }
+
+        private DateTime CalculateSlaDue(DateTime start, TimeSpan slaDuration)
+        {
+            var current = start;
+            var remaining = slaDuration;
+
+            try
+            {
+                while (remaining > TimeSpan.Zero)
+                {
+                    //check and skip if current is weekends
+                    if (!IsWorkingDay(current.Date))
+                    {
+                        current = current.Date.AddDays(1).Add(WorkStart);
+                        continue;
+                    }
+
+                    var workStartToday = current.Date.Add(WorkStart);
+                    var workEndToday = current.Date.Add(WorkEnd);
+
+                    var availableToday = workEndToday - current;
+                    var timeToAdd = remaining < availableToday ? remaining : availableToday;
+
+                    current = current.Add(timeToAdd);
+                    remaining -= timeToAdd;
+
+                    //check if there's hours remaining, move to the next day
+                    if (remaining > TimeSpan.Zero)
+                        current = current.Date.AddDays(1).Add(WorkStart);
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return current;
         }
 
     }
