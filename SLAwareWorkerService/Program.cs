@@ -1,4 +1,8 @@
+using System.Collections.ObjectModel;
+using System.Data;
 using Microsoft.EntityFrameworkCore;
+using Serilog.Sinks.MSSqlServer;
+using Serilog;
 using SLAwareWorkerService;
 using SLAwareWorkerService.Entities.SLAware;
 using SLAwareWorkerService.Interfaces;
@@ -20,6 +24,34 @@ builder.Services.AddDbContext<slaware_dataContext>(options =>
         sqloptions.MaxBatchSize(20);
     });
 });
+
+//Serilog
+var columnOptions = new ColumnOptions
+{
+    AdditionalColumns = new Collection<SqlColumn>
+    {
+        new SqlColumn { ColumnName = "ticket_id", DataType = SqlDbType.BigInt },
+        new SqlColumn { ColumnName = "response_breached_date", DataType = SqlDbType.DateTime },
+        new SqlColumn { ColumnName = "resolution_breached_date", DataType = SqlDbType.DateTime },
+        new SqlColumn { ColumnName = "response_due_dtm", DataType = SqlDbType.DateTime },
+        new SqlColumn { ColumnName = "resolution_due_dtm", DataType = SqlDbType.DateTime },
+        new SqlColumn { ColumnName = "response_remaining_time", DataType = SqlDbType.Time },
+        new SqlColumn { ColumnName = "resolution_remaining_time", DataType = SqlDbType.Time },
+    }
+};
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.MSSqlServer(
+        connectionString: connectionString,
+        sinkOptions: new MSSqlServerSinkOptions
+        {
+            TableName = "ticket_breach_logs",
+            AutoCreateSqlTable = true
+        },
+        columnOptions: columnOptions
+    )
+    .Enrich.FromLogContext()
+    .CreateLogger();
 
 builder.Services.AddScoped<slaware_dataContext>();
 

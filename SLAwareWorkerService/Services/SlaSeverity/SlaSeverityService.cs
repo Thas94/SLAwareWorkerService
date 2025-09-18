@@ -7,6 +7,9 @@ using SLAwareWorkerService.Entities.SLAware;
 using SLAwareWorkerService.Interfaces;
 using SLAwareWorkerService.Enums;
 using Microsoft.EntityFrameworkCore;
+using Serilog.Context;
+using Serilog;
+using System.Net.Sockets;
 
 namespace SLAwareWorkerService.Services.SlaSeverity
 {
@@ -113,10 +116,16 @@ namespace SLAwareWorkerService.Services.SlaSeverity
         private (bool, DateTime?) IsResponseBreached(TicketSlaTracking ticket)
         {
             if (ticket.FirstResponseAt == null && DateTime.Now > ticket.ResponseDueDtm)
+            {
+                BreachLogging(ticket);
                 return (true, DateTime.Now);
+            }
 
             if (ticket.FirstResponseAt != null && ticket.FirstResponseAt > ticket.ResponseDueDtm)
+            {
+                BreachLogging(ticket);
                 return (true, DateTime.Now);
+            }
 
             return (false, null);
         }
@@ -132,6 +141,18 @@ namespace SLAwareWorkerService.Services.SlaSeverity
             return (false, null);
         }
 
-        
+        private void BreachLogging(TicketSlaTracking tracking)
+        {
+            using (LogContext.PushProperty("ticket_id", tracking.TicketId))
+            using (LogContext.PushProperty("response_breached_date", tracking.ResponseSlaBreachDtm))
+            using (LogContext.PushProperty("resolution_breached_date", tracking.ResponseSlaBreachDtm))
+            using (LogContext.PushProperty("response_due_dtm", tracking.ResponseDueDtm))
+            using (LogContext.PushProperty("resolution_due_dtm", tracking.ResolutionDueDtm))
+            using (LogContext.PushProperty("response_remaining_time", tracking.RemainingResponseDueTime))
+            using (LogContext.PushProperty("resolution_remaining_time", tracking.RemainingResolutionDueTime))
+            {
+                Log.Warning("SLA breach detected.");
+            }
+        }
     }
 }

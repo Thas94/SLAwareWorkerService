@@ -31,6 +31,8 @@ public partial class slaware_dataContext : DbContext
 
     public virtual DbSet<TicketActivityLog> TicketActivityLogs { get; set; }
 
+    public virtual DbSet<TicketBreachLog> TicketBreachLogs { get; set; }
+
     public virtual DbSet<TicketCategory> TicketCategories { get; set; }
 
     public virtual DbSet<TicketMessage> TicketMessages { get; set; }
@@ -346,6 +348,28 @@ public partial class slaware_dataContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ticket_activity_log_users");
+        });
+
+        modelBuilder.Entity<TicketBreachLog>(entity =>
+        {
+            entity.ToTable("ticket_breach_logs");
+
+            entity.Property(e => e.ResolutionBreachedDate)
+                .HasColumnType("datetime")
+                .HasColumnName("resolution_breached_date");
+            entity.Property(e => e.ResolutionDueDtm)
+                .HasColumnType("datetime")
+                .HasColumnName("resolution_due_dtm");
+            entity.Property(e => e.ResolutionRemainingTime).HasColumnName("resolution_remaining_time");
+            entity.Property(e => e.ResponseBreachedDate)
+                .HasColumnType("datetime")
+                .HasColumnName("response_breached_date");
+            entity.Property(e => e.ResponseDueDtm)
+                .HasColumnType("datetime")
+                .HasColumnName("response_due_dtm");
+            entity.Property(e => e.ResponseRemainingTime).HasColumnName("response_remaining_time");
+            entity.Property(e => e.TicketId).HasColumnName("ticket_id");
+            entity.Property(e => e.TimeStamp).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<TicketCategory>(entity =>
