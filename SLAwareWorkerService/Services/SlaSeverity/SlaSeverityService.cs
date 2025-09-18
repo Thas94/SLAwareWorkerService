@@ -33,12 +33,12 @@ namespace SLAwareWorkerService.Services.SlaSeverity
                             ResumeSlaTimers(track.TicketId);
 
                         //check sla breach
-                        if (!track.IsResponseSlaBreach)
+                        if (track.IsResponseSlaBreach == false)
                         {
                             track.IsResponseSlaBreach = IsResponseBreached(track).Item1;
                             track.ResponseSlaBreachDtm = IsResponseBreached(track).Item2;
                         }
-                        if (!track.IsResolutionSlaBreach)
+                        if (!track.IsResolutionSlaBreach == false)
                         {
                             track.IsResolutionSlaBreach = IsResolutionBreached(track).Item1;
                             track.ResolutionSlaBreachDtm = IsResolutionBreached(track).Item2;
@@ -65,19 +65,27 @@ namespace SLAwareWorkerService.Services.SlaSeverity
             if(track != null)
             {
                 track.PausedDtm = workEndToday;
-                if (!track.IsResponseSlaBreach)
+                if (track.IsResponseSlaBreach == false)
                 {
                     if (track.ResponseDueDtm.Day == DateTime.Now.Day)
                     {
                         var remaining = track.ResponseDueDtm - DateTime.Now.Date.Add(WorkEnd);
+                        if(track.RemainingResponseDueTime.HasValue)
+                        {
+                            remaining = track.RemainingResponseDueTime.Value.ToTimeSpan() - remaining;
+                        }
                         track.RemainingResponseDueTime = TimeOnly.FromTimeSpan(remaining);
                     }
                 }
-                if (!track.IsResolutionSlaBreach)
+                if (track.IsResolutionSlaBreach == false)
                 {
                     if (track.ResolutionDueDtm.Day == DateTime.Now.Day)
                     {
                         var remaining = track.ResolutionDueDtm - DateTime.Now.Date.Add(WorkEnd);
+                        if (track.RemainingResolutionDueTime.HasValue)
+                        {
+                            remaining = track.RemainingResolutionDueTime.Value.ToTimeSpan() - remaining;
+                        }
                         track.RemainingResolutionDueTime = TimeOnly.FromTimeSpan(remaining);
                     }
                 }
@@ -91,9 +99,9 @@ namespace SLAwareWorkerService.Services.SlaSeverity
             var track = _slaware_DataContext.TicketSlaTrackings.FirstOrDefault(x => x.TicketId == ticketId);
             if(track != null)
             {
-                if (!track.IsResponseSlaBreach && track.RemainingResponseDueTime.HasValue)
+                if (track.IsResponseSlaBreach == false && track.RemainingResponseDueTime.HasValue)
                     track.ResponseDueDtm = current.Add(track.RemainingResponseDueTime.Value.ToTimeSpan());
-                if (!track.IsResolutionSlaBreach && track.RemainingResolutionDueTime.HasValue)
+                if (track.IsResolutionSlaBreach == false && track.RemainingResolutionDueTime.HasValue)
                     track.ResolutionDueDtm = current.Add(track.RemainingResolutionDueTime.Value.ToTimeSpan());
                 track.PausedDtm = null;
                 track.RemainingResponseDueTime = null;

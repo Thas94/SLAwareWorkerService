@@ -22,6 +22,4 @@ public partial class TicketTag
     public DateTime? UpdatedAt { get; set; }
 
     public string? UpdatedBy { get; set; }
-
-    public virtual ICollection<TicketSubCategory> TicketSubCategories { get; set; } = new List<TicketSubCategory>();
 }

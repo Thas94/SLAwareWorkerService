@@ -9,21 +9,21 @@ public partial class TicketSubCategory
 
     public long TicketCategoryId { get; set; }
 
-    public long TagId { get; set; }
+    public long? TagId { get; set; }
 
     public string Name { get; set; } = null!;
 
-    public bool Active { get; set; }
+    public bool IsActive { get; set; }
+
+    public string? CreatedBy { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
-    public string CreatedBy { get; set; } = null!;
-
-    public DateTime? UpdatedAt { get; set; }
-
     public string? UpdatedBy { get; set; }
 
-    public virtual TicketTag Tag { get; set; } = null!;
+    public DateTime UpdatedAt { get; set; }
+
+    public virtual ICollection<SubCategorySeverityLevel> SubCategorySeverityLevels { get; set; } = new List<SubCategorySeverityLevel>();
 
     public virtual TicketCategory TicketCategory { get; set; } = null!;
 }

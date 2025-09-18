@@ -3,11 +3,13 @@ using System.Collections.Generic;
 
 namespace SLAwareWorkerService.Entities.SLAware;
 
-public partial class TicketCategory
+public partial class UserCompany
 {
     public long Id { get; set; }
 
-    public string Name { get; set; } = null!;
+    public long UserId { get; set; }
+
+    public long CompanyId { get; set; }
 
     public bool IsActive { get; set; }
 
@@ -19,7 +21,5 @@ public partial class TicketCategory
 
     public DateTime UpdatedAt { get; set; }
 
-    public virtual ICollection<TicketSubCategory> TicketSubCategories { get; set; } = new List<TicketSubCategory>();
-
-    public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
+    public virtual User User { get; set; } = null!;
 }

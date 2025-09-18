@@ -7,21 +7,25 @@ public partial class User
 {
     public long Id { get; set; }
 
-    public long RoleId { get; set; }
-
     public string FirstName { get; set; } = null!;
 
     public string LastName { get; set; } = null!;
 
-    public long ClientTierId { get; set; }
+    public string Password { get; set; } = null!;
 
-    public virtual ClientTier ClientTier { get; set; } = null!;
+    public string? Email { get; set; }
 
-    public virtual ICollection<Client> Clients { get; set; } = new List<Client>();
+    public string? CreatedBy { get; set; }
 
-    public virtual Role Role { get; set; } = null!;
+    public DateTime CreatedAt { get; set; }
+
+    public string? UpdatedBy { get; set; }
+
+    public DateTime UpdatedAt { get; set; }
 
     public virtual ICollection<TicketActivityLog> TicketActivityLogs { get; set; } = new List<TicketActivityLog>();
 
     public virtual ICollection<TicketNotification> TicketNotifications { get; set; } = new List<TicketNotification>();
+
+    public virtual ICollection<UserCompany> UserCompanies { get; set; } = new List<UserCompany>();
 }
